@@ -54,7 +54,7 @@ log: bochs.out
 
 mouse: enabled=0
 
-keyboard: enabled=1,keymap=/home/co/bochs/share/bochs/keymaps/x11-pc-us.map
+keyboard: keymap=/home/co/bochs/share/bochs/keymaps/x11-pc-us.map
 
 ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 ata0-master: type=disk, path="hd60M.img", mode=flat
@@ -79,16 +79,49 @@ cd /home/.../bochs/bin
 
 # 部署工作环境(Win64)
 ## 一、nasm安装
-> 下载nasm：https://www.nasm.us/pub/nasm/releasebuilds  
-> 配置环境变量（安装目录） C:\Program Files\NASM
+> 下载 *nasm* ：https://www.nasm.us/pub/nasm/releasebuilds  
+> 配置环境变量（安装目录） *C:\Program Files\NASM*
 ## 二、gcc安装
-> 下载MinGW：http://sourceforge.net/projects/mingw/files/  
-> 配置环境变量（安装目录） D:\MinGw\bin  
-> cmd中执行：  
+> 下载 *MinGW* ：http://sourceforge.net/projects/mingw/files/  
+> 配置环境变量（安装目录） *D:\MinGw\bin*  
+> cmd中执行，安装 *gcc* ：  
 ```cmd
 mingw-get install gcc
 ```
 可同时安装g++与gdb
 ## 三、bochs安装
-> 下载bochs-win64 https://sourceforge.net/projects/bochs/files/bochs/2.6.11/
-> 安装目录 C:\Program Files\Bochs-2.6.11
+> 下载 *bochs-win64* ：https://sourceforge.net/projects/bochs/files/bochs/2.6.11/  
+> 安装目录 *C:\Program Files\Bochs-2.6.11*  
+> 可添加至环境变量  
+
+新增配置文件 **borchsrc.disk**
+```
+megs: 32
+
+romimage: file="C:\Program Files\Bochs-2.6.11\BIOS-bochs-latest"
+vgaromimage: file="C:\Program Files\Bochs-2.6.11\VGABIOS-lgpl-latest"
+mouse: enabled=0
+
+boot: disk
+
+log: bochs.out
+
+mouse: enabled=0
+
+keyboard: keymap="C:\Program Files\Bochs-2.6.11\keymaps\x11-pc-us.map"
+
+ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+#ata0-master: type=disk, path="hd60M.img", mode=flat
+#, cylinders=121, heads=16, spt=63
+#ata0-slave: type=disk, path="hd80M.img", mode=flat, cylinders=162, heads=16, spt=63
+```
+![WindowsFirstExecute](pic/1.3_1.jpg)
+创建软盘
+```cmd
+bximage
+```
+新增软盘配置
+> ata0-master: type=disk, path="yourOwnPath\hd60M.img", mode=flat
+## 四、安装dd磁盘操作工具
+> 下载 *ddrelease64.exe* ：http://www.chrysocome.net/download  
+> 改名 *dd.exe* 并放入 *C:\Windows\System32* 中
