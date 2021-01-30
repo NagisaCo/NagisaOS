@@ -1,0 +1,8 @@
+编译等一系列工作
+	make all
+
+启动虚拟机
+	bochs -f bochsrc.disk.book
+
+如有疑问：可以加微信 a13822599431 
+		备注：操作系统
