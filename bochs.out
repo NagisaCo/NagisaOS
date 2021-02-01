@@ -33,7 +33,7 @@
 00000000000i[      ]   Sound support: SB16 ES1370
 00000000000i[      ]   USB support: UHCI OHCI EHCI xHCI
 00000000000i[      ]   VGA extension support: vbe cirrus voodoo
-00000000000i[MEM0  ] allocated memory at 000001F44CD92040. after alignment, vector=000001F44CD93000
+00000000000i[MEM0  ] allocated memory at 0000022EF96DE040. after alignment, vector=0000022EF96DF000
 00000000000i[MEM0  ] 32.00MB
 00000000000i[MEM0  ] mem block size = 0x00020000, blocks=256
 00000000000i[MEM0  ] rom at 0xfffe0000/131072 ('C:\Program Files\Bochs-2.6.11\BIOS-bochs-latest')
@@ -43,7 +43,7 @@
 00000000000i[DEV   ] PIIX3 PCI-to-ISA bridge present at device 1, function 0
 00000000000i[PLUGIN] init_dev of 'cmos' plugin device by virtual method
 00000000000i[CMOS  ] Using local time for initial clock
-00000000000i[CMOS  ] Setting initial clock to: Sun Jan 31 14:52:51 2021 (time0=1612075971)
+00000000000i[CMOS  ] Setting initial clock to: Mon Feb 01 10:27:27 2021 (time0=1612146447)
 00000000000i[PLUGIN] init_dev of 'dma' plugin device by virtual method
 00000000000i[DMA   ] channel 4 used by cascade
 00000000000i[PLUGIN] init_dev of 'pic' plugin device by virtual method
@@ -196,7 +196,7 @@
 00000322277i[BIOS  ] ram_end=32MB
 00000362837i[BIOS  ] Found 1 cpu(s)
 00000376489i[BIOS  ] bios_table_addr: 0x000f9db8 end=0x000fcc00
-00000603420i[WINGUI] dimension update x=720 y=400 fontheight=16 fontwidth=9 bpp=8
+00000604196i[WINGUI] dimension update x=720 y=400 fontheight=16 fontwidth=9 bpp=8
 00000704310i[PCI   ] i440FX PMC write to PAM register 59 (TLB Flush)
 00001032240i[P2ISA ] PCI IRQ routing: PIRQA# set to 0x0b
 00001032259i[P2ISA ] PCI IRQ routing: PIRQB# set to 0x09
@@ -236,23 +236,23 @@
 00001902122i[BIOS  ] ata0-0: PCHS=121/16/63 translation=none LCHS=121/16/63
 00005349300i[BIOS  ] IDE time out
 00017404781i[BIOS  ] Booting from 0000:7c00
-00053140000p[WINGUI] >>PANIC<< POWER button turned off.
-00053140000i[CPU0  ] CPU is in real mode (active)
-00053140000i[CPU0  ] CS.mode = 16 bit
-00053140000i[CPU0  ] SS.mode = 16 bit
-00053140000i[CPU0  ] EFER   = 0x00000000
-00053140000i[CPU0  ] | EAX=00000006  EBX=00000700  ECX=00090000  EDX=000001f0
-00053140000i[CPU0  ] | ESP=00007bfa  EBP=00000000  ESI=00000002  EDI=00000001
-00053140000i[CPU0  ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf zf af PF cf
-00053140000i[CPU0  ] | SEG sltr(index|ti|rpl)     base    limit G D
-00053140000i[CPU0  ] |  CS:f000( 0004| 0|  0) 000f0000 0000ffff 0 0
-00053140000i[CPU0  ] |  DS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
-00053140000i[CPU0  ] |  SS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
-00053140000i[CPU0  ] |  ES:0000( 0005| 0|  0) 00000000 0000ffff 0 0
-00053140000i[CPU0  ] |  FS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
-00053140000i[CPU0  ] |  GS:b800( 0005| 0|  0) 000b8000 0000ffff 0 0
-00053140000i[CPU0  ] | EIP=0000ff53 (00000738)
-00053140000i[CPU0  ] | CR0=0x60000010 CR2=0x00000000
-00053140000i[CPU0  ] | CR3=0x00000000 CR4=0x00000000
-00053140000i[CMOS  ] Last time is 1612075984 (Sun Jan 31 14:53:04 2021)
-00053140000i[SIM   ] quit_sim called with exit code 1
+00040824000p[WINGUI] >>PANIC<< POWER button turned off.
+00040824000i[CPU0  ] CPU is in real mode (active)
+00040824000i[CPU0  ] CS.mode = 16 bit
+00040824000i[CPU0  ] SS.mode = 16 bit
+00040824000i[CPU0  ] EFER   = 0x00000000
+00040824000i[CPU0  ] | EAX=00000000  EBX=00000d00  ECX=00090000  EDX=000001f0
+00040824000i[CPU0  ] | ESP=00007c00  EBP=00007bfe  ESI=00000002  EDI=00000004
+00040824000i[CPU0  ] | IOPL=0 id vip vif ac vm rf nt of df if tf sf ZF af PF cf
+00040824000i[CPU0  ] | SEG sltr(index|ti|rpl)     base    limit G D
+00040824000i[CPU0  ] |  CS:0000( 0004| 0|  0) 00000000 0000ffff 0 0
+00040824000i[CPU0  ] |  DS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+00040824000i[CPU0  ] |  SS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+00040824000i[CPU0  ] |  ES:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+00040824000i[CPU0  ] |  FS:0000( 0005| 0|  0) 00000000 0000ffff 0 0
+00040824000i[CPU0  ] |  GS:b800( 0005| 0|  0) 000b8000 0000ffff 0 0
+00040824000i[CPU0  ] | EIP=00007be2 (00007be2)
+00040824000i[CPU0  ] | CR0=0x60000010 CR2=0x00000000
+00040824000i[CPU0  ] | CR3=0x00000000 CR4=0x00000000
+00040824000i[CMOS  ] Last time is 1612146457 (Mon Feb 01 10:27:37 2021)
+00040824000i[SIM   ] quit_sim called with exit code 1

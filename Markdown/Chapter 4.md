@@ -44,7 +44,7 @@
     2. 段寄存器
         - 实模式：入栈，sp-2
         - 保护模式：入栈，esp-4
-## 二、全局描述符表 GDT *Global Descriptor Table*
+## 二、进入保护模式前的准备
 ### 1. 段描述符(8字节)
 
   **高32位**
@@ -106,9 +106,156 @@
   - LDT
     LDT在系统中可以存在多个，而且不是全局可见的，它们只对引用它们的任务可见，每个任务最多可以拥有一个LDT。另外，每一个LDT自身作为一个段存在，它们的段描述符被放在GDT中。  
     lldt指令用于初始化LDTR，格式：lldt 16位寄存器/16位内存
+### 3. 打开A20地址线
+    在实模式下，只能使用A0~A19 20位地址线。使用A20Gate控制A20地址线。  
+    打开A20Gate：将0x92端口第1位置1  
+    ```asm
+    in al,0x92
+    or al,00000010b
+    out 0x92,al
+    ```
+### 4. 切换CR0寄存器的PE位
+
+  ![CR0寄存器](pic/4.2_2.jpg)
+  ```asm
+  mov eax,cr0
+  or cr0,1
+  mov cr0,eax
+  ```
 
 ## 三、进入保护模式
-### 1. 打开A20地址线
-    在实模式下，只能使用A0~A19 20位地址线。使用A20Gate控制A20地址线。  
-    打开A20Gate  
-    ```
+### 1. 修改MBR
+  ```asm
+  mov cx,4 ;loader较大，需写入4个扇区
+  call rd_disk_m_16
+  ```
+### 2. 更新boot.int
+```asm
+    ;-------------	 loader和kernel   ----------
+    LOADER_BASE_ADDR equ 0x500 
+    LOADER_START_SECTOR equ 0x2
+
+    ;--------------   gdt描述符属性  -------------
+    DESC_G_4K   equ	  1_00000000000000000000000b   
+    DESC_D_32   equ	   1_0000000000000000000000b
+    DESC_L	    equ	    0_000000000000000000000b	;  64位代码标记，此处标记为0便可。
+    DESC_AVL    equ	     0_00000000000000000000b	;  cpu不用此位，暂置为0  
+    DESC_LIMIT_CODE2  equ 1111_0000000000000000b
+    DESC_LIMIT_DATA2  equ DESC_LIMIT_CODE2
+    DESC_LIMIT_VIDEO2  equ 0000_000000000000000b
+    DESC_P	    equ		  1_000000000000000b
+    DESC_DPL_0  equ		   00_0000000000000b
+    DESC_DPL_1  equ		   01_0000000000000b
+    DESC_DPL_2  equ		   10_0000000000000b
+    DESC_DPL_3  equ		   11_0000000000000b
+    DESC_S_CODE equ		     1_000000000000b
+    DESC_S_DATA equ	  DESC_S_CODE
+    DESC_S_sys  equ		     0_000000000000b
+    DESC_TYPE_CODE  equ	      1000_00000000b	;x=1,c=0,r=0,a=0 代码段是可执行的,非依从的,不可读的,已访问位a清0.  
+    DESC_TYPE_DATA  equ	      0010_00000000b	;x=0,e=0,w=1,a=0 数据段是不可执行的,向上扩展的,可写的,已访问位a清0.
+
+    DESC_CODE_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + DESC_L + DESC_AVL + DESC_LIMIT_CODE2 + DESC_P + DESC_DPL_0 + DESC_S_CODE + DESC_TYPE_CODE + 0x00
+    DESC_DATA_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + DESC_L + DESC_AVL + DESC_LIMIT_DATA2 + DESC_P + DESC_DPL_0 + DESC_S_DATA + DESC_TYPE_DATA + 0x00
+    DESC_VIDEO_HIGH4 equ (0x00 << 24) + DESC_G_4K + DESC_D_32 + DESC_L + DESC_AVL + DESC_LIMIT_VIDEO2 + DESC_P + DESC_DPL_0 + DESC_S_DATA + DESC_TYPE_DATA + 0x0b
+
+    ;--------------   选择子属性  ---------------
+    RPL0  equ   00b
+    RPL1  equ   01b
+    RPL2  equ   10b
+    RPL3  equ   11b
+    TI_GDT	 equ   000b
+    TI_LDT	 equ   100b
+ ```
+### 3. 创建loader
+```asm
+%include "boot.inc"
+section loader vstart=LOADER_BASE_ADDR
+LOADER_STACK_TOP equ LOADER_BASE_ADDR
+jmp loader_start
+   
+;构建gdt及其内部的描述符
+GDT_BASE:
+   dd 0x00000000 
+   dd 0x00000000
+CODE_DESC:
+   dd 0x0000FFFF 
+   dd DESC_CODE_HIGH4
+DATA_STACK_DESC:
+   dd 0x0000FFFF
+   dd DESC_DATA_HIGH4
+VIDEO_DESC:
+   dd 0x80000007	       ;limit=(0xbffff-0xb8000)/4k=0x7
+	dd DESC_VIDEO_HIGH4  ; 此时dpl已改为0
+
+GDT_SIZE    equ   $ - GDT_BASE
+GDT_LIMIT   equ   GDT_SIZE -	1 
+times 60 dq 0					 ; 此处预留60个描述符的slot
+SELECTOR_CODE equ (0x0001<<3) + TI_GDT + RPL0         ; 相当于(CODE_DESC - GDT_BASE)/8 + TI_GDT + RPL0
+SELECTOR_DATA equ (0x0002<<3) + TI_GDT + RPL0	 ; 同上
+SELECTOR_VIDEO equ (0x0003<<3) + TI_GDT + RPL0	 ; 同上 
+
+;以下是定义gdt的指针，前2字节是gdt界限，后4字节是gdt起始地址
+
+gdt_ptr  dw  GDT_LIMIT 
+dd  GDT_BASE
+loadermsg db '2 loader in real.'
+
+loader_start:
+;------------------------------------------------------------
+;INT 0x10    功能号:0x13    功能描述:打印字符串
+;------------------------------------------------------------
+;输入:
+;AH 子功能号=13H
+;BH = 页码
+;BL = 属性(若AL=00H或01H)
+;CX＝字符串长度
+;(DH、DL)＝坐标(行、列)
+;ES:BP＝字符串地址 
+;AL＝显示输出方式
+;   0——字符串中只含显示字符，其显示属性在BL中。显示后，光标位置不变
+;   1——字符串中只含显示字符，其显示属性在BL中。显示后，光标位置改变
+;   2——字符串中含显示字符和显示属性。显示后，光标位置不变
+;   3——字符串中含显示字符和显示属性。显示后，光标位置改变
+;无返回值
+   mov sp, LOADER_BASE_ADDR
+   mov bp, loadermsg    ; ES:BP = 字符串地址
+   mov cx, 17			   ; CX = 字符串长度
+   mov ax, 0x1301		   ; AH = 13,  AL = 01h
+   mov bx, 0x001f		   ; 页号为0(BH = 0) 蓝底粉红字(BL = 1fh)
+   mov dx, 0x1800		   ;
+   int 0x10             ; 10h 号中断
+
+;----------------------------------------   准备进入保护模式   ------------------------------------------
+									;1 打开A20
+									;2 加载gdt
+									;3 将cr0的pe位置1
+
+
+   ;-----------------  打开A20  ----------------
+   in al,0x92
+   or al,0000_0010B
+   out 0x92,al
+   ;-----------------  加载GDT  ----------------
+   lgdt [gdt_ptr]
+   ;-----------------  cr0第0位置1  ----------------
+   mov eax, cr0
+   or eax, 0x00000001
+   mov cr0, eax
+   jmp  SELECTOR_CODE:p_mode_start      ; 刷新流水线，避免分支预测的影响,这种cpu优化策略，最怕jmp跳转，
+                                       ; 这将导致之前做的预测失效，从而起到了刷新的作用。
+
+[bits 32]
+p_mode_start:
+   mov ax, SELECTOR_DATA
+   mov ds, ax
+   mov es, ax
+   mov ss, ax
+   mov esp,LOADER_STACK_TOP
+   mov ax, SELECTOR_VIDEO
+   mov gs, ax
+
+   mov byte [gs:160], 'P'
+
+   jmp $
+
+```
