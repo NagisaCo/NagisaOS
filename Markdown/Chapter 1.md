@@ -75,6 +75,7 @@ cd /home/.../bochs/bin
 ```
 选择[2] 并输入配置文件名 *bochsrc.disk*  
 选择[6] 运行
+
 ![FirstExecute](pic/1.4_1.jpg)
 
 # 部署工作环境(Win64)
@@ -115,7 +116,9 @@ ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 #, cylinders=121, heads=16, spt=63
 #ata0-slave: type=disk, path="hd80M.img", mode=flat, cylinders=162, heads=16, spt=63
 ```
+
 ![WindowsFirstExecute](pic/1.3_1.jpg)
+
 创建软盘
 ```cmd
 bximage

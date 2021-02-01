@@ -1,10 +1,12 @@
 # 编写MBR主引导记录
 ## 一、BIOS
 ### 1. 实模式下的1MB内存布局
+
 ![实模式下的内存布局](pic/2.1_1.jpg)
 ### 2. 加电启动
 当前指令位置：f000:fff0 ( *0xffff0* BIOS入口地址)  
 当前指令: jmpf f000:e05b  ( *0xfe05b* BIOS代码开始处)
+
 ![t0状态](pic/2.1_2.jpg)
 
 ## 二、MBR
@@ -77,6 +79,8 @@ SECTION MBR vstart=0x7c00;vstart：告诉编译器后面的代码以0x7c00为基
 nasm -o mbr.bin mbr.asm
 dd if=mbr.bin of=hd60M.img bs=512 count=1 conv=notrunc
 ```
+
 ![img写入内容](pic/2.2_1.jpg)
 成功运行并显示
+
 ![进入MBR](pic/2.2_2.jpg)
